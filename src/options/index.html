@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>clipback settings</title>
+    <link rel="stylesheet" href="tokens.css" />
+    <style>
+      body {
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--f-ui);
+        margin: 0;
+        padding: 32px;
+        max-width: 60ch;
+      }
+      h1 {
+        font-size: 1.15rem;
+        margin: 0 0 4px;
+      }
+      p.sub {
+        color: var(--ink-2);
+        margin: 0 0 24px;
+        font-size: 0.9rem;
+      }
+      label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--ink-2);
+        margin: 16px 0 5px;
+      }
+      select,
+      input {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: var(--r);
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--ink);
+        font-family: var(--f-ui);
+        font-size: 0.9rem;
+      }
+      select:focus-visible,
+      input:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      button {
+        margin-top: 20px;
+        padding: 8px 16px;
+        border-radius: var(--r);
+        border: 1px solid transparent;
+        background: var(--accent);
+        color: var(--accent-ink);
+        font-family: var(--f-ui);
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+      .status {
+        margin-top: 14px;
+        font-size: 0.82rem;
+        color: var(--ink-2);
+        min-height: 1.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>clipback</h1>
+    <p class="sub">Clip a YouTube segment into a written note, without leaving the page.</p>
+
+    <label for="segment">Segment length</label>
+    <select id="segment">
+      <option value="60">1 minute</option>
+      <option value="180" selected>3 minutes</option>
+      <option value="300">5 minutes</option>
+    </select>
+
+    <button id="save">Save</button>
+    <p class="status" id="status"></p>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

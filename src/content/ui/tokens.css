@@ -1,0 +1,95 @@
+/* clipback design tokens.
+ *
+ * THE token block. Every colour in this project is defined here and nowhere
+ * else — bin/check-adherence.sh rule 1 in clipback-knowledge tests that.
+ * Values come from the demo approved at hld-lld-demo-gate.
+ *
+ * Three theme states, because the viewer has three: an explicit choice stamps
+ * data-theme, and the default "system" setting stamps nothing at all.
+ * `--neutral` is what the ungrounded state uses. It is deliberately NOT a
+ * danger hue: failing to ground a segment is a correct outcome, not an error.
+ */
+:root {
+  --ground: #ffffff;
+  --surface: #f4f4f5;
+  --surface-2: #e9e9ec;
+  --line: #d6d6db;
+  --ink: #17171c;
+  --ink-2: #55555f;
+  --ink-3: #83838f;
+  --accent: #b07406;
+  --accent-ink: #ffffff;
+  --grounded: #2f7d55;
+  --partial: #9a6b12;
+  --neutral: #5a6672;
+  --shadow: rgba(0, 0, 0, 0.34);
+  --r: 6px;
+  --pad: 16px;
+  --f-ui: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ground: #0d0d10;
+    --surface: #17171b;
+    --surface-2: #212127;
+    --line: #2e2e36;
+    --ink: #ededf0;
+    --ink-2: #a6a6b2;
+    --ink-3: #75757f;
+    --accent: #f0b429;
+    --accent-ink: #17171c;
+    --grounded: #5fbf8b;
+    --partial: #e0a83c;
+    --neutral: #8d9aa8;
+    --shadow: rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme='dark'] {
+  --ground: #0d0d10;
+  --surface: #17171b;
+  --surface-2: #212127;
+  --line: #2e2e36;
+  --ink: #ededf0;
+  --ink-2: #a6a6b2;
+  --ink-3: #75757f;
+  --accent: #f0b429;
+  --accent-ink: #17171c;
+  --grounded: #5fbf8b;
+  --partial: #e0a83c;
+  --neutral: #8d9aa8;
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
+.clipback-toast {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r);
+  font-family: var(--f-ui);
+  box-shadow: 0 6px 22px var(--shadow);
+}
+.clipback-toast--grounded {
+  border-left-color: var(--grounded);
+}
+.clipback-toast--partial {
+  border-left-color: var(--partial);
+}
+.clipback-toast--ungrounded {
+  border-left-color: var(--neutral);
+}
+.clipback-toast button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clipback-toast,
+  .clipback-toast * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

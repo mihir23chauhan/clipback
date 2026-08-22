@@ -1,0 +1,53 @@
+name: ci
+
+# A gate nobody enforces is a preference. This workflow's job is to FAIL when a
+# gate fails — it deploys nothing.
+#
+# `npm run evals` is deliberately absent. It makes one paid provider call per
+# trace and needs a credential. Putting it here would either break every fork's
+# CI or require a key in repository secrets, and the second is how R-SECRET-FILE
+# gets violated by a workflow file rather than by a person.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: typecheck
+        run: npm run typecheck
+
+      - name: lint
+        run: npm run lint
+
+      - name: test
+        run: npm test
+
+      - name: build
+        run: npm run build
+
+      - name: the built extension is loadable
+        run: |
+          test -f dist/manifest.json
+          test -f dist/worker.js
+          test -f dist/content.js
+          test -f dist/main-world.js
+          test -f dist/options.html
+          node -e "const m=require('./dist/manifest.json');
+            if (m.manifest_version!==3) throw new Error('not MV3');
+            const main=m.content_scripts.find(c=>c.world==='MAIN');
+            if (!main) throw new Error('no MAIN-world content script — acquisition rungs 1 and 2 would silently fail');
+            console.log('manifest ok: MV3, MAIN-world script declared');"

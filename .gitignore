@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.key
+*.pem
+tests/evals/traces/
+.DS_Store
+coverage/
+playwright-report/
+test-results/
