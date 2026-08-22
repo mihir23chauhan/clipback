@@ -173,3 +173,32 @@ describe('shouldTryNextModel', () => {
     for (const s of [200, 400, 401, 403]) expect(shouldTryNextModel(s)).toBe(false)
   })
 })
+
+describe('Gemini reports an invalid key as 400, not 401 — found by running it', () => {
+  it('is reported as unauthorized, not as "the provider is busy"', async () => {
+    // Without this the user is told the provider is busy when their key is
+    // wrong, AND the model walk burns every configured id getting there.
+    // Telling the user something false about why it failed is what SC-005
+    // forbids. Only found by making a real call.
+    fetchMock.mockResolvedValue(
+      jsonResponse(
+        { error: { code: 400, status: 'INVALID_ARGUMENT', details: [{ reason: 'API_KEY_INVALID' }] } },
+        400,
+      ),
+    )
+    const { gemini } = await import('../src/worker/adapters/gemini')
+    const r = await gemini.compose({ cues, prompt: '', key: KEY, models: ['a', 'b'] })
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.reason).toBe('unauthorized')
+    // and it did NOT walk to the second model
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('a 400 that is NOT a key problem is bad-shape, not a retry', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ error: { code: 400, message: 'bad request' } }, 400))
+    const { gemini } = await import('../src/worker/adapters/gemini')
+    const r = await gemini.compose({ cues, prompt: '', key: KEY, models: ['a', 'b'] })
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.reason).toBe('bad-shape')
+  })
+})

@@ -58,6 +58,20 @@ async function compose(args: ComposeArgs): Promise<ComposeResult> {
     if (res.status === 401 || res.status === 403) {
       return failure('unauthorized', 'the provider rejected this API key')
     }
+
+    // Gemini reports an INVALID KEY as 400 INVALID_ARGUMENT, not 401/403.
+    // Found by running it: without this the user is told "the provider is busy"
+    // when in fact their key is wrong, and the model walk burns every id
+    // getting there. Telling the user something false about why it failed is
+    // what SC-005 forbids.
+    if (res.status === 400) {
+      const text = await res.text()
+      if (text.includes('API_KEY_INVALID') || text.includes('API key not valid')) {
+        return failure('unauthorized', 'the provider rejected this API key')
+      }
+      return failure('bad-shape', `the provider rejected the request: ${text.slice(0, 200)}`)
+    }
+
     if (!res.ok) return { retry: true as const, status: res.status }
 
     const body = (await res.json()) as Record<string, unknown>
