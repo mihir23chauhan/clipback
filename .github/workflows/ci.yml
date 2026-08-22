@@ -9,8 +9,10 @@ name: ci
 # gets violated by a workflow file rather than by a person.
 
 on:
+  # Every branch, not just main and develop. A gate that only runs on the
+  # branches you have already merged into tells you too late — and on a
+  # feature-branch workflow that is every branch where the work happens.
   push:
-    branches: [main, develop]
   pull_request:
     branches: [main, develop]
 
