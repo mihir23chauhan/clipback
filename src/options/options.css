@@ -1,0 +1,55 @@
+/* Every colour comes from tokens.css. None is defined here — check-adherence
+ * rule 1 fails the build otherwise. */
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  margin: 0;
+  padding: 32px;
+  max-width: 62ch;
+  line-height: 1.55;
+}
+h1 { font-size: 1.15rem; margin: 0 0 4px; }
+p.sub { color: var(--ink-2); margin: 0 0 24px; font-size: 0.9rem; }
+label { display: block; font-size: 0.78rem; color: var(--ink-2); margin: 18px 0 5px; }
+select, input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: 0.9rem;
+}
+.hint { color: var(--ink-3); font-size: 0.78rem; margin: 6px 0 0; }
+.row { display: flex; gap: 10px; align-items: center; margin-top: 22px; flex-wrap: wrap; }
+button {
+  padding: 8px 16px;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+button.ghost { background: transparent; color: var(--ink-2); }
+select:focus-visible, input:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.disclosure {
+  margin-top: 22px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--neutral);
+  border-radius: var(--r);
+  background: var(--surface);
+  font-size: 0.86rem;
+}
+.status { margin-top: 14px; font-size: 0.82rem; color: var(--ink-2); min-height: 1.2em; }
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

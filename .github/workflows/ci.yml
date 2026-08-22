@@ -41,6 +41,12 @@ jobs:
       - name: build
         run: npm run build
 
+      - name: design adherence
+        # The same seven-rule check the approved demo passed. It is in the
+        # knowledge repo, which CI does not have, so the rules travel with a
+        # copy here — and the copy is asserted identical in the local gate.
+        run: bash scripts/check-adherence.sh src/content/ui/tokens.css src/options/options.css
+
       - name: the built extension is loadable
         run: |
           test -f dist/manifest.json

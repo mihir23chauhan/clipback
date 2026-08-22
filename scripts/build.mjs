@@ -11,7 +11,7 @@ import { cp, rm, mkdir } from 'node:fs/promises'
 const ENTRIES = [
   ['worker', 'src/worker/index.ts', 'clipbackWorker'],
   ['content', 'src/content/index.ts', 'clipbackContent'],
-  ['main-world', 'src/main-world/reader.ts', 'clipbackMainWorld'],
+  ['main-world', 'src/main-world/entry.ts', 'clipbackMainWorld'],
   ['options', 'src/options/options.ts', 'clipbackOptions'],
 ]
 
@@ -35,5 +35,6 @@ for (const [file, entry, globalName] of ENTRIES) {
 await cp('public', 'dist', { recursive: true })
 await cp('src/options/index.html', 'dist/options.html')
 await cp('src/content/ui/tokens.css', 'dist/tokens.css')
+await cp('src/options/options.css', 'dist/options.css')
 
 console.log('built dist/ — load it unpacked at chrome://extensions')

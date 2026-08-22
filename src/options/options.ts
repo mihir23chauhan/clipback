@@ -1,38 +1,129 @@
 /**
  * C4 — the options page.
  *
- * The one deployable thing repo-genesis owes: a built extension that Chrome
- * loads unpacked, whose options page stores a setting and reads it back. No
- * provider call, no credential — just proof the chain from source to a running
- * extension exists, at the moment when fixing it is cheap.
+ * Two things here are mandated rather than chosen, and hld assigns both to
+ * fe-plan by name:
  *
- * Note which store: `segmentSeconds` is a preference and lives in `local`.
- * The credential does NOT — hld K5 puts apiKey and notion.* in
- * chrome.storage.session, and this page will write them there when be-build
- * implements it.
+ *   FR-014  the training disclosure. ACKNOWLEDGED, not merely displayed.
+ *           Declining leaves the extension configured and unable to compose —
+ *           there is no silent proceed. The flag it sets is read by C3 on every
+ *           compose, so this page cannot be walked around.
+ *
+ *   spec decision 5  video mode unavailable on this provider, said at the point
+ *           the user would choose it rather than left to be discovered.
+ *
+ * The key field being empty on a new browser session is a DESIGNED STATE, not an
+ * error: the credential is session-scoped by ruling, and the copy says so.
  */
+import { ADAPTERS } from '../worker/adapters'
+import {
+  clearCredentials,
+  readCredentials,
+  readSettings,
+  writeCredentials,
+  writeSettings,
+} from '../worker/config'
+import { STRINGS } from '../content/strings'
 
-const KEY = 'segmentSeconds'
-const DEFAULT = 180
+const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T
+
+const providerSel = $<HTMLSelectElement>('provider')
+const keyInput = $<HTMLInputElement>('apiKey')
+const keyHint = $<HTMLElement>('keyHint')
+const segmentSel = $<HTMLSelectElement>('segment')
+const modeSel = $<HTMLSelectElement>('mode')
+const modeHint = $<HTMLElement>('modeHint')
+const disclosure = $<HTMLElement>('disclosure')
+const disclosureText = $<HTMLElement>('disclosureText')
+const acceptBtn = $<HTMLButtonElement>('disclosureAccept')
+const declineBtn = $<HTMLButtonElement>('disclosureDecline')
+const status = $<HTMLElement>('status')
+
+const currentAdapter = () => ADAPTERS.find((a) => a.id === providerSel.value) ?? ADAPTERS[0]
+
+function renderModeHint(): void {
+  const a = currentAdapter()
+  if (!a) return
+  // Told at the point of choosing — spec decision 5.
+  modeHint.textContent =
+    modeSel.value === 'video' && !a.supportsVideo ? STRINGS.videoUnavailable(a.label) : ''
+}
+
+async function renderDisclosure(): Promise<void> {
+  const a = currentAdapter()
+  const { disclosureShown } = await readSettings()
+  if (!a || !a.freeTierMayTrain || disclosureShown) {
+    disclosure.hidden = true
+    return
+  }
+  disclosure.hidden = false
+  disclosureText.textContent = STRINGS.trainingDisclosure(a.label)
+  acceptBtn.textContent = STRINGS.trainingAccept
+  declineBtn.textContent = STRINGS.trainingDecline
+}
 
 async function load(): Promise<void> {
-  const stored = await chrome.storage.local.get(KEY)
-  const select = document.querySelector<HTMLSelectElement>('#segment')
-  if (select) select.value = String(stored[KEY] ?? DEFAULT)
+  for (const a of ADAPTERS) {
+    const o = document.createElement('option')
+    o.value = a.id
+    o.textContent = a.label
+    providerSel.append(o)
+  }
+
+  const s = await readSettings()
+  providerSel.value = s.provider
+  segmentSel.value = String(s.segmentSeconds)
+  modeSel.value = s.mode
+
+  const { apiKey } = await readCredentials()
+  // A designed state, not an error.
+  keyHint.textContent = apiKey ? '' : STRINGS.keyReentry
+
+  renderModeHint()
+  await renderDisclosure()
 }
 
 async function save(): Promise<void> {
-  const select = document.querySelector<HTMLSelectElement>('#segment')
-  const status = document.querySelector<HTMLElement>('#status')
-  if (!select) return
-  await chrome.storage.local.set({ [KEY]: Number(select.value) })
-  const readBack = await chrome.storage.local.get(KEY)
-  if (status) {
-    // textContent, never innerHTML — the discipline starts here even though
-    // this string is ours.
-    status.textContent = `Saved. Stored value reads back as ${readBack[KEY]}s.`
+  await writeSettings({
+    provider: providerSel.value,
+    segmentSeconds: Number(segmentSel.value),
+    mode: modeSel.value === 'video' ? 'video' : 'captions',
+  })
+  if (keyInput.value) {
+    // session, never local. config.ts has no function that could do otherwise.
+    await writeCredentials({ apiKey: keyInput.value })
+    keyInput.value = ''
+    keyHint.textContent = ''
   }
+  status.textContent = 'Saved.'
 }
 
-document.querySelector('#save')?.addEventListener('click', () => void save())
+providerSel.addEventListener('change', () => {
+  renderModeHint()
+  void renderDisclosure()
+})
+modeSel.addEventListener('change', renderModeHint)
+
+acceptBtn.addEventListener('click', () => {
+  void writeSettings({ disclosureShown: true }).then(() => {
+    disclosure.hidden = true
+    status.textContent = 'Acknowledged.'
+  })
+})
+
+declineBtn.addEventListener('click', () => {
+  // Configured, and unable to compose. No silent proceed.
+  disclosure.hidden = true
+  status.textContent = 'Not acknowledged — clipback will not send anything to this provider.'
+})
+
+$<HTMLButtonElement>('save').addEventListener('click', () => void save())
+$<HTMLButtonElement>('clearKey').addEventListener('click', () => {
+  void clearCredentials().then(() => {
+    keyInput.value = ''
+    keyHint.textContent = STRINGS.keyReentry
+    status.textContent = 'Key cleared.'
+  })
+})
+
 void load()

@@ -6,6 +6,9 @@ import { defineConfig } from '@playwright/test'
 // file rather than through Playwright's `use.browser`.
 export default defineConfig({
   testDir: './e2e',
+  // The probes under e2e/probes hit the live YouTube network and are not a gate.
+  // They answer a design question on demand; `npm run probe` runs them.
+  testIgnore: ['**/probes/**'],
   timeout: 60_000,
   fullyParallel: false,
   workers: 1,

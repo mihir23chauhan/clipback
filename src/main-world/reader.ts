@@ -84,3 +84,34 @@ export function cuesInRange(cues: readonly Cue[], start: number, end: number): C
 
 export type { RouteResult }
 export type { FailureReason as ReaderFailureReason }
+
+/**
+ * Listen for K1 requests from C2 and answer them.
+ *
+ * This is the whole of C1's public surface. It never sends anything C2 did not
+ * ask for, and it echoes the nonce verbatim so C2 can tell our reply from one
+ * YouTube's own scripts posted.
+ */
+export function listenForAcquireRequests(w: Window = window): void {
+  w.addEventListener('message', (e: MessageEvent) => {
+    if (e.source !== w) return
+    const m = e.data as Record<string, unknown> | null
+    if (!m || m['v'] !== 1 || m['kind'] !== 'acquire') return
+    const nonce = m['nonce']
+    const videoId = m['videoId']
+    if (typeof nonce !== 'string' || !nonce || typeof videoId !== 'string') return
+
+    void acquire(videoId, w).then((r) => {
+      w.postMessage(
+        r.ok
+          ? { v: 1, nonce, kind: 'transcript', ok: true, route: r.route, videoId, cues: r.cues }
+          : { v: 1, nonce, kind: 'transcript', ok: false, videoId, reason: r.reason, detail: r.detail },
+        w.location.origin,
+      )
+    })
+  })
+}
+
+// NOTE: no side effect at import. The listener is started by entry.ts, which is
+// what the manifest loads. Keeping this module import-pure is what lets the
+// ladder be unit-tested in a plain node environment.

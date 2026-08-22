@@ -4,69 +4,18 @@
     <meta charset="utf-8" />
     <title>clipback settings</title>
     <link rel="stylesheet" href="tokens.css" />
-    <style>
-      body {
-        background: var(--ground);
-        color: var(--ink);
-        font-family: var(--f-ui);
-        margin: 0;
-        padding: 32px;
-        max-width: 60ch;
-      }
-      h1 {
-        font-size: 1.15rem;
-        margin: 0 0 4px;
-      }
-      p.sub {
-        color: var(--ink-2);
-        margin: 0 0 24px;
-        font-size: 0.9rem;
-      }
-      label {
-        display: block;
-        font-size: 0.8rem;
-        color: var(--ink-2);
-        margin: 16px 0 5px;
-      }
-      select,
-      input {
-        width: 100%;
-        padding: 8px 10px;
-        border-radius: var(--r);
-        border: 1px solid var(--line);
-        background: var(--surface);
-        color: var(--ink);
-        font-family: var(--f-ui);
-        font-size: 0.9rem;
-      }
-      select:focus-visible,
-      input:focus-visible,
-      button:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-      }
-      button {
-        margin-top: 20px;
-        padding: 8px 16px;
-        border-radius: var(--r);
-        border: 1px solid transparent;
-        background: var(--accent);
-        color: var(--accent-ink);
-        font-family: var(--f-ui);
-        font-size: 0.85rem;
-        cursor: pointer;
-      }
-      .status {
-        margin-top: 14px;
-        font-size: 0.82rem;
-        color: var(--ink-2);
-        min-height: 1.2em;
-      }
-    </style>
+    <link rel="stylesheet" href="options.css" />
   </head>
   <body>
     <h1>clipback</h1>
     <p class="sub">Clip a YouTube segment into a written note, without leaving the page.</p>
+
+    <label for="provider">Provider</label>
+    <select id="provider"></select>
+
+    <label for="apiKey">API key</label>
+    <input id="apiKey" type="password" autocomplete="off" spellcheck="false" />
+    <p class="hint" id="keyHint"></p>
 
     <label for="segment">Segment length</label>
     <select id="segment">
@@ -75,7 +24,25 @@
       <option value="300">5 minutes</option>
     </select>
 
-    <button id="save">Save</button>
+    <label for="mode">Mode</label>
+    <select id="mode">
+      <option value="captions" selected>Captions — free</option>
+      <option value="video">Video — about 1.7&cent; a clip</option>
+    </select>
+    <p class="hint" id="modeHint"></p>
+
+    <section id="disclosure" class="disclosure" hidden>
+      <p id="disclosureText"></p>
+      <div class="row">
+        <button id="disclosureAccept" type="button" class="primary"></button>
+        <button id="disclosureDecline" type="button" class="ghost"></button>
+      </div>
+    </section>
+
+    <div class="row">
+      <button id="save" type="button" class="primary">Save</button>
+      <button id="clearKey" type="button" class="ghost">Clear key</button>
+    </div>
     <p class="status" id="status"></p>
 
     <script type="module" src="options.js"></script>

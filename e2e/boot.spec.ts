@@ -40,11 +40,13 @@ test('the options page stores a setting and reads it back', async () => {
   await page.goto(`chrome-extension://${extensionId}/options.html`)
   await page.selectOption('#segment', '300')
   await page.click('#save')
+  await expect(page.locator('#status')).toHaveText(/Saved/)
 
-  // This is the whole "one deployable thing": source -> build -> a running
-  // extension that persists a value and reads it back.
-  await expect(page.locator('#status')).toHaveText(/reads back as 300s/)
+  // Assert PERSISTENCE, not a status string: reload and check the value came
+  // back. A status message can be right while nothing was stored.
+  await page.reload()
+  await expect(page.locator('#segment')).toHaveValue('300')
+
   expect(errors, `console errors on the options page: ${errors.join(' | ')}`).toEqual([])
-
   await page.close()
 })
