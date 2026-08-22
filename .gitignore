@@ -8,3 +8,5 @@ tests/evals/traces/
 coverage/
 playwright-report/
 test-results/
+probe-result.json
+probe-rung3-result.json
