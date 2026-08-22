@@ -8,7 +8,16 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     languageOptions: {
-      globals: { chrome: 'readonly', window: 'readonly', document: 'readonly', console: 'readonly' },
+      globals: {
+        chrome: 'readonly',
+        window: 'readonly',
+        document: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        location: 'readonly',
+        fetch: 'readonly',
+        URLSearchParams: 'readonly',
+      },
     },
     rules: {
       // R-VALUE-BOUNDARY (T0) leans on this: an implicit any hides a float
